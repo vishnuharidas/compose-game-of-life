@@ -66,13 +66,21 @@ class Matrix<T>(
         _values[row * cols + col] = v
     }
 
+    fun count(f: (T) -> Boolean): Int {
+        return _values.count { f(it) }
+    }
+
 }
 
 data class GameState(
     val isPaused: Boolean = false,
     val generation: Int = 0,
     val cells: Matrix<Boolean>, // Row major list.
-)
+){
+    val population: Int by lazy {
+        cells.count { it }
+    }
+}
 
 class Game(
     val maxRows: Int,
@@ -200,7 +208,15 @@ fun GameBoard(rows: Int = 20, cols: Int = 20){
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text("Generation: ${gameState.value.generation}")
+        // Info display - Generation and Population
+        Row {
+
+            Text("Generation: ${gameState.value.generation}")
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text("Population: ${gameState.value.population}")
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
