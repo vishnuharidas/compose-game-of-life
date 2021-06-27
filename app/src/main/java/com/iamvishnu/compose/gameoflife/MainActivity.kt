@@ -15,10 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.iamvishnu.compose.gameoflife.ui.theme.ComposeGameOfLifeTheme
 import kotlinx.coroutines.delay
+
+const val CELL_SIZE_DP = 15
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +30,14 @@ class MainActivity : ComponentActivity() {
             ComposeGameOfLifeTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    GameBoard()
+
+                    val widthPixels = LocalContext.current.resources.displayMetrics.widthPixels
+                    val oneBlock = CELL_SIZE_DP * LocalContext.current.resources.displayMetrics.density
+
+                    val cols = (widthPixels / oneBlock).toInt()
+                    val rows = (cols * 1.25).toInt()
+
+                    GameBoard(rows = rows, cols = cols)
                 }
             }
         }
@@ -64,19 +74,17 @@ data class GameState(
     val cells: Matrix<Boolean>, // Row major list.
 )
 
-class Game {
-
-    companion object{
-        const val ROWS: Int = 20
-        const val COLS: Int = 20
-    }
+class Game(
+    val maxRows: Int,
+    val maxCols: Int,
+) {
 
     val state: MutableState<GameState> by lazy {
         mutableStateOf(
             GameState(
                 isPaused = true,
                 generation = 0,
-                cells = Matrix(ROWS, COLS){ _, _ ->
+                cells = Matrix(maxRows, maxCols){ _, _ ->
                     false
                 }
             )
@@ -87,7 +95,7 @@ class Game {
         state.value = GameState(
             isPaused = true,
             generation = 0,
-            cells = Matrix(ROWS, COLS){ _, _ -> false }
+            cells = Matrix(maxRows, maxCols){ _, _ -> false }
         )
     }
 
@@ -109,7 +117,7 @@ class Game {
         // For the time being, invert all of them.
         state.value = state.value.copy(
             generation = state.value.generation + 1,
-            cells = Matrix(ROWS, COLS){ r, c ->
+            cells = Matrix(maxRows, maxCols){ r, c ->
                 state.value.cells.canLiveAhead(r, c)
             }
         )
@@ -162,9 +170,9 @@ class Game {
 
 @Preview
 @Composable
-fun GameBoard(){
+fun GameBoard(rows: Int = 20, cols: Int = 20){
 
-    val game = remember { Game() }
+    val game = remember { Game(maxRows = rows, maxCols = cols) }
 
     val gameState = remember { game.state }
 
@@ -255,8 +263,8 @@ fun GameBoardRow(currentRow: Int, matrix: Matrix<Boolean>, onClick: (Int, Int) -
 
             Box(
                 modifier = Modifier
-                    .width(15.dp)
-                    .height(15.dp)
+                    .width(CELL_SIZE_DP.dp)
+                    .height(CELL_SIZE_DP.dp)
                     .background(color = if (isAlive) Color.Black else Color.White)
                     .border(width = 1.dp, color = Color.LightGray)
                     .clickable {
