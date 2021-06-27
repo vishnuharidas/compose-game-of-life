@@ -59,6 +59,7 @@ class Matrix<T>(
 }
 
 data class GameState(
+    val isPaused: Boolean = false,
     val generation: Int = 0,
     val cells: Matrix<Boolean>, // Row major list.
 )
@@ -73,8 +74,9 @@ class Game {
     val state: MutableState<GameState> by lazy {
         mutableStateOf(
             GameState(
-                0,
-                Matrix(ROWS, COLS){ _, _ ->
+                isPaused = true,
+                generation = 0,
+                cells = Matrix(ROWS, COLS){ _, _ ->
                     false
                 }
             )
@@ -83,8 +85,9 @@ class Game {
 
     fun reset(){
         state.value = GameState(
-            0,
-            Matrix(ROWS, COLS){ _, _ -> false }
+            isPaused = true,
+            generation = 0,
+            cells = Matrix(ROWS, COLS){ _, _ -> false }
         )
     }
 
@@ -92,18 +95,21 @@ class Game {
 
         val newValue = state.value.cells[row, col].not()
 
-        state.value = GameState(
-            state.value.generation,
-            state.value.cells.copyWith(row, col, newValue)
+        state.value = state.value.copy(
+            cells = state.value.cells.copyWith(row, col, newValue)
         )
+    }
+
+    fun pauseOrResume(pause: Boolean? = null){
+        state.value = state.value.copy(isPaused = pause ?: state.value.isPaused.not())
     }
 
     fun nextGeneration(){
 
         // For the time being, invert all of them.
-        state.value = GameState(
-            state.value.generation + 1,
-            Matrix(ROWS, COLS){ r, c ->
+        state.value = state.value.copy(
+            generation = state.value.generation + 1,
+            cells = Matrix(ROWS, COLS){ r, c ->
                 state.value.cells.canLiveAhead(r, c)
             }
         )
@@ -162,18 +168,13 @@ fun GameBoard(){
 
     val gameState = remember { game.state }
 
-    val paused = remember { mutableStateOf(true) }
+    LaunchedEffect(!gameState.value.isPaused){
 
-    LaunchedEffect(paused.value){
-
-        if(!paused.value){
-
-            while(!paused.value){
-                game.nextGeneration()
-                delay(timeMillis = 150)
-            }
-
+        while(!gameState.value.isPaused){
+            game.nextGeneration()
+            delay(timeMillis = 150)
         }
+
     }
 
     Column(
@@ -201,7 +202,7 @@ fun GameBoard(){
             // Next
             Button(onClick = {
 
-                paused.value = true
+                game.pauseOrResume(pause = true)
                 game.nextGeneration()
 
             }) {
@@ -211,15 +212,14 @@ fun GameBoard(){
             Spacer(modifier = Modifier.width(8.dp))
 
             Button(onClick = {
-                paused.value = !paused.value
+                game.pauseOrResume()
             }) {
-                Text( if(paused.value) "Start" else "Pause" )
+                Text( if(gameState.value.isPaused) "Start" else "Pause" )
             }
 
             Spacer(modifier = Modifier.width(8.dp))
 
             Button(onClick = {
-                paused.value = true
                 game.reset()
             }){
                 Text("Reset")
