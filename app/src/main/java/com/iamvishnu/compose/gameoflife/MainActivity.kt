@@ -18,8 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.iamvishnu.compose.gameoflife.model.Game
 import com.iamvishnu.compose.gameoflife.model.Matrix
 import com.iamvishnu.compose.gameoflife.ui.theme.ComposeGameOfLifeTheme
@@ -78,7 +80,15 @@ fun GameBoard(rows: Int = 20, cols: Int = 20){
             game.selectCell(r, c)
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            gameState.value.status,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Info display - Generation and Population
         Row {
