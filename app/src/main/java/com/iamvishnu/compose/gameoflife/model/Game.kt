@@ -51,7 +51,7 @@ class Game(
         val oldCount = state.value.cells.count { it }
 
         // Compare only if the old and new count are the same. Skip other cases.
-        val isStill = (newCount == oldCount) && newMatrix.isSame(state.value.cells)
+        val isStill = (newCount > 0 && newCount == oldCount) && newMatrix.isSame(state.value.cells)
 
         // For the time being, invert all of them.
         state.value = state.value.copy(
