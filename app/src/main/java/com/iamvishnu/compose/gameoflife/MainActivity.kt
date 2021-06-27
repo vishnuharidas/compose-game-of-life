@@ -266,7 +266,7 @@ fun GameBoardRow(currentRow: Int, matrix: Matrix<Boolean>, onClick: (Int, Int) -
                     .width(CELL_SIZE_DP.dp)
                     .height(CELL_SIZE_DP.dp)
                     .background(color = if (isAlive) Color.Black else Color.White)
-                    .border(width = 1.dp, color = Color.LightGray)
+                    .border(width = 1.dp, color = Color(android.graphics.Color.parseColor("#EEEEEE")))
                     .clickable {
                         onClick(currentRow, currentColumn)
                     },
