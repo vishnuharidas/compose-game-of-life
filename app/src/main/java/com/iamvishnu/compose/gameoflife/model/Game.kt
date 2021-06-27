@@ -47,11 +47,20 @@ class Game(
             state.value.cells.canLiveAhead(r, c)
         }
 
+        val newCount = newMatrix.count { it }
+        val oldCount = state.value.cells.count { it }
+
+        // Compare only if the old and new count are the same. Skip other cases.
+        val isStill = (newCount == oldCount) && newMatrix.isSame(state.value.cells)
+
         // For the time being, invert all of them.
         state.value = state.value.copy(
             generation = state.value.generation + 1,
             cells = newMatrix,
-            isPaused = newMatrix.count { it } == 0 // Stop when population is zero.
+            isStillLife = isStill,
+            isPaused = state.value.isPaused             // If it is already paused
+                    || newMatrix.count { it } == 0      // Or if the count is zero
+                    || isStill                          // Or stop when population is zero.
         )
 
     }
