@@ -43,12 +43,15 @@ class Game(
 
     fun nextGeneration(){
 
+        val newMatrix = Matrix(maxRows, maxCols){ r, c ->
+            state.value.cells.canLiveAhead(r, c)
+        }
+
         // For the time being, invert all of them.
         state.value = state.value.copy(
             generation = state.value.generation + 1,
-            cells = Matrix(maxRows, maxCols){ r, c ->
-                state.value.cells.canLiveAhead(r, c)
-            }
+            cells = newMatrix,
+            isPaused = newMatrix.count { it } == 0 // Stop when population is zero.
         )
 
     }
