@@ -26,4 +26,10 @@ class Matrix<T>(
         return _values.count { f(it) }
     }
 
+    fun isSame(other: Matrix<T>): Boolean {
+        return other._values.filterIndexed { index, item ->
+            item != this._values[index]
+        }.isEmpty()
+    }
+
 }
